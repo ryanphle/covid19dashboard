@@ -43,7 +43,7 @@ public class NewsScraperDataAccessService implements NewsDao {
         return source;
     }
 
-    public void scrapeWebsite() throws IOException {
+    public void scrapeWebsite() {
         String url = String.format(baseURL, "05-15-20");
 
         try {
