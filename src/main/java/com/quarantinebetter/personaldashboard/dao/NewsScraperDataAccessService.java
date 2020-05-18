@@ -10,7 +10,9 @@ import org.springframework.stereotype.Repository;
 
 import javax.xml.ws.http.HTTPException;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,7 +20,7 @@ import java.util.UUID;
 public class NewsScraperDataAccessService implements NewsDao {
     private static List<NewsArticle> DB = new ArrayList<>();
     private final static String source = "CNN";
-    private static String baseURL = "https://www.cnn.com/world/live-news/coronavirus-pandemic-%s-intl/index.html";
+    private static String baseURL = "https://www.cnn.com/world/live-news/coronavirus-pandemic-%s-intl";
     private static String articleClass = "sc-cJSrbW poststyles__PostBox-sc-1egoi1-0 tzojb";
 
     @Override
@@ -44,18 +46,21 @@ public class NewsScraperDataAccessService implements NewsDao {
     }
 
     public void scrapeWebsite() {
-        String url = String.format(baseURL, "05-15-20");
+        String url = String.format(baseURL, getCurrentDate());
+        System.out.println(url);
 
         try {
-            Document doc = Jsoup.connect(url).get();
+            Document doc = Jsoup.connect(url + "/index.html").get();
             Elements elements = doc.getElementsByClass(articleClass);
 
             // Loop through articles and create NewsArticles
             for (Element e : elements) {
                 String title = e.getElementsByTag("h2").text();
+                String linkId = e.attr("id");
+                String articleLink = url + "/" + linkId;
                 if (title.length() > 0) {
                     UUID id = UUID.randomUUID();
-                    NewsArticle article = new NewsArticle(id, url, title);
+                    NewsArticle article = new NewsArticle(id, articleLink, title);
                     DB.add(article);
                 }
             }
@@ -63,5 +68,11 @@ public class NewsScraperDataAccessService implements NewsDao {
         catch (IOException e) {
             return;
         }
+    }
+
+    public String getCurrentDate() {
+        SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yy");
+        Date date = new Date();
+        return sdf.format(date);
     }
 }
