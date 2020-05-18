@@ -11,9 +11,11 @@ public interface NewsDao {
     int deleteArticleById(UUID id);
 
     int addArticle(UUID id, NewsArticle article);
-    
+
     default int addArticle(NewsArticle article) {
         UUID id = UUID.randomUUID();
         return addArticle(id, article);
     }
+
+    String getSource();
 }
